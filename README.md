@@ -1,0 +1,1 @@
+Este programa tiene la finalidad de buscar una ruta más rápida con el algoritmo dijkstra, en el cual se ingresa el punto donde se encuentra y el punto donde se dirige y la hora en la que viaja, con esta información este calcula el recorrido más rápido.
