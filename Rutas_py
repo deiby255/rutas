@@ -1,0 +1,71 @@
+import heapq
+
+# Grafo que representa el sistema de transporte
+# Las claves son las estaciones y los valores son diccionarios con las estaciones adyacentes y sus tiempos de viaje
+graph = {
+    'A': {'B': 5, 'C': 10},
+    'B': {'A': 5, 'C': 3, 'D': 8},
+    'C': {'A': 10, 'B': 3, 'D': 2},
+    'D': {'B': 8, 'C': 2}
+}
+
+def dijkstra(graph, start, end):
+    # Cola de prioridad, distancias y estaciones previas
+    queue = [(0, start)]  # (costo, nodo)
+    distances = {start: 0}
+    previous_nodes = {start: None}
+   
+    while queue:
+        current_distance, current_node = heapq.heappop(queue)
+       
+        if current_node == end:
+            # Reconstruimos la ruta más corta
+            path = []
+            while previous_nodes[current_node] is not None:
+                path.insert(0, current_node)
+                current_node = previous_nodes[current_node]
+            path.insert(0, start)
+            return path, current_distance  # Ruta y distancia total
+       
+        # Si la distancia actual es mayor que la conocida, ignoramos el nodo
+        if current_distance > distances.get(current_node, float('inf')):
+            continue
+       
+        # Exploramos los nodos vecinos
+        for neighbor, weight in graph[current_node].items():
+            distance = current_distance + weight
+            if distance < distances.get(neighbor, float('inf')):
+                distances[neighbor] = distance
+                heapq.heappush(queue, (distance, neighbor))
+                previous_nodes[neighbor] = current_node
+               
+    return None, float('inf')  # Si no hay ruta
+
+def adjust_for_rules(graph, current_time):
+    # Ajusta el grafo según las reglas lógicas basadas en la hora actual
+    if 7 <= current_time <= 9:  # Hora punta (mañana)
+        graph['A']['B'] = 10  # Aumentamos el tiempo de la ruta A -> B
+    elif 17 <= current_time <= 19:  # Hora punta (tarde)
+        graph['C']['D'] = 5  # Aumentamos el tiempo de la ruta C -> D
+    return graph
+
+def main():
+    # Interacción con el usuario
+    start_station = input("Ingrese la estación de inicio: ")
+    end_station = input("Ingrese la estación de destino: ")
+    current_time = int(input("Ingrese la hora actual (en formato 24 horas): "))
+   
+    # Ajustamos el grafo según la hora actual
+    graph_updated = adjust_for_rules(graph.copy(), current_time)
+   
+    # Calculamos la mejor ruta usando el algoritmo de Dijkstra
+    path, distance = dijkstra(graph_updated, start_station, end_station)
+   
+    if path:
+        print(f"La mejor ruta de {start_station} a {end_station} es {path} con una distancia total de {distance} minutos.")
+    else:
+        print("No se encontró una ruta entre las estaciones.")
+
+# Ejecutar el sistema
+if __name__ == "__main__":
+    main()
